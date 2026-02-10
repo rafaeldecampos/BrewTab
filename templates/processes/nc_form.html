@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Criar Não Conformidade{% endblock %}
+
+{% block content %}
+<h2>Criar Não Conformidade (NC)</h2>
+
+<div class="content" style="max-width: 700px;">
+    <form method="post" style="margin-top: 1.5rem;">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="titulo">Título da NC:</label>
+            <input 
+                type="text" 
+                id="titulo" 
+                name="titulo" 
+                required
+                placeholder="Descrição breve do problema encontrado"
+                autofocus
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="descricao">Descrição Detalhada:</label>
+            <textarea 
+                id="descricao" 
+                name="descricao"
+                required
+                placeholder="Descreva em detalhes a não conformidade, incluindo quando foi descoberta, onde e quem descobriu..."
+                rows="6"
+            ></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="severidade">Severidade:</label>
+            <select id="severidade" name="severidade" required>
+                <option value="">-- Selecione uma severidade --</option>
+                {% for value, label in severidades %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+            <small style="color: #999; display: block; margin-top: 0.5rem;">
+                Baixa: Desvio menor | Média: Desvio moderado | Alta: Desvio grave | Crítica: Risco à segurança
+            </small>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-success">Criar NC</button>
+            <a href="{% url 'process:nao_conformidades' cervejaria.id %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

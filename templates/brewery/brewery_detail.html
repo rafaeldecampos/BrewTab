@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ brewery.name }} - BREWTAB{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+        <h2>{{ brewery.name }}</h2>
+        <p style="color: #999; margin-top: 0.5rem;">
+            Proprietário: <strong>{{ brewery.owner.get_full_name|default:brewery.owner.username }}</strong>
+        </p>
+        <p style="color: #999; margin-top: 0.5rem;">
+            Criada em: <strong>{{ brewery.created_at|date:"d/m/Y \à\s H:i" }}</strong>
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+        <a href="{% url 'brewery:edit' brewery.id %}" class="btn">Editar</a>
+        <a href="{% url 'brewery:delete' brewery.id %}" class="btn btn-danger">Excluir</a>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Informações da Cervejaria</h3>
+    <p><strong>Nome:</strong> {{ brewery.name }}</p>
+    <p><strong>Proprietário:</strong> {{ brewery.owner.get_full_name|default:brewery.owner.username }}</p>
+    <p><strong>E-mail:</strong> {{ brewery.owner.email }}</p>
+    <p><strong>Criada em:</strong> {{ brewery.created_at|date:"d/m/Y H:i" }}</p>
+    <p><strong>Última atualização:</strong> {{ brewery.updated_at|date:"d/m/Y H:i" }}</p>
+</div>
+
+<h3 style="margin-top: 2rem;">Links Rápidos</h3>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+    <div class="card">
+        <h3>📋 Processos</h3>
+        <p style="color: #666;">Gerenciar processos de produção e SOPs</p>
+        <a href="{% url 'process:list' brewery.id %}" class="btn btn-secondary" style="display: inline-block; margin-top: 0.5rem;">Ver Processos</a>
+    </div>
+    <div class="card">
+        <h3>⚠️ Não Conformidades</h3>
+        <p style="color: #666;">Rastrear problemas de qualidade e conformidade</p>
+        <a href="{% url 'process:nao_conformidades' brewery.id %}" class="btn btn-secondary" style="display: inline-block; margin-top: 0.5rem;">Gerenciar NCs</a>
+    </div>
+    <div class="card">
+        <h3>✓ Pontos HACCP</h3>
+        <p style="color: #666;">Definir Pontos Críticos de Controle</p>
+        <p style="color: #999; margin: 0.5rem 0;"><small>Disponível na Etapa 5</small></p>
+    </div>
+    <div class="card">
+        <h3>📊 Dashboard</h3>
+        <p style="color: #666;">Visualizar KPIs e indicadores de desempenho</p>
+        <a href="{% url 'process:dashboard' brewery.id %}" class="btn btn-secondary" style="display: inline-block; margin-top: 0.5rem;">Acessar Dashboard</a>
+    </div>
+</div>
+
+<div style="margin-top: 2rem;">
+    <a href="{% url 'brewery:list' %}" class="btn btn-secondary">← Voltar para Cervejarias</a>
+</div>
+{% endblock %}

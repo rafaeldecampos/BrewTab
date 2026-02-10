@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if brewery %}Editar{% else %}Criar{% endif %} Cervejaria - BREWTAB{% endblock %}
+
+{% block content %}
+<h2>{% if brewery %}Editar Cervejaria{% else %}Criar Nova Cervejaria{% endif %}</h2>
+
+<div class="content" style="max-width: 500px;">
+    <form method="post" style="margin-top: 1.5rem;">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="name">Nome da Cervejaria:</label>
+            <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                required
+                value="{% if brewery %}{{ brewery.name }}{% endif %}"
+                placeholder="Ex: Cervejaria Golden Hops"
+                autofocus
+            >
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-success">{% if brewery %}Salvar Alterações{% else %}Criar Cervejaria{% endif %}</button>
+            <a href="{% url 'brewery:list' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

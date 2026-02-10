@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Entrar - BREWTAB{% endblock %}
+
+{% block content %}
+<div class="content" style="max-width: 400px; margin: 2rem auto;">
+    <h2>Entrar</h2>
+    
+    <form method="post" style="margin-top: 1.5rem;">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <div class="message error">{{ error }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_username">Nome de usuário:</label>
+            <input type="text" id="id_username" name="username" required autofocus>
+            {% if form.username.errors %}
+                {% for error in form.username.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_password">Senha:</label>
+            <input type="password" id="id_password" name="password" required>
+            {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-success" style="width: 100%;">Entrar</button>
+    </form>
+
+    <div style="margin-top: 1.5rem; text-align: center;">
+        <p style="color: #666;">Não tem uma conta? <a href="{% url 'signup' %}" style="color: #3498db; text-decoration: none;">Criar conta</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - {{ cervejaria.name }}{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+        <h2>Dashboard - Análise de Performance</h2>
+        <p style="color: #999; margin-top: 0.5rem;">{{ cervejaria.name }} | Última atualização: Agora</p>
+    </div>
+    <div style="display: flex; gap: 1rem;">
+        <a href="{% url 'brewery:detail' cervejaria.id %}" class="btn btn-secondary">← Voltar</a>
+        <a href="{% url 'process:dre' cervejaria.id %}" class="btn btn-success">📊 Ver DRE</a>
+    </div>
+</div>
+
+<div class="content">
+    <!-- ===== SEÇÃO 1: KPIs PRINCIPAIS ===== -->
+    <div style="margin-bottom: 2.5rem;">
+        <h3 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 0.5rem;">📊 Resumo Geral</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+            <div class="card" style="border-left: 5px solid #3498db; background: linear-gradient(135deg, #ecf0f1 0%, #ffffff 100%);">
+                <h3 style="margin: 0 0 0.5rem 0; color: #3498db; display: flex; align-items: center; gap: 0.5rem;">📋 Processos</h3>
+                <p style="font-size: 2.5rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">{{ total_processos }}</p>
+                <p style="color: #666; margin: 0; font-size: 0.9rem;">SOPs cadastrados e ativos</p>
+            </div>
+
+            <div class="card" style="border-left: 5px solid #28a745; background: linear-gradient(135deg, #eafce8 0%, #ffffff 100%);">
+                <h3 style="margin: 0 0 0.5rem 0; color: #28a745; display: flex; align-items: center; gap: 0.5rem;">▶️ Execuções</h3>
+                <p style="font-size: 2.5rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">{{ total_execucoes }}</p>
+                <small style="color: #666;">✓ {{ execucoes_concluidas }} concluídas</small>
+            </div>
+
+            <div class="card" style="border-left: 5px solid #9b59b6; background: linear-gradient(135deg, #f4ecf7 0%, #ffffff 100%);">
+                <h3 style="margin: 0 0 0.5rem 0; color: #9b59b6; display: flex; align-items: center; gap: 0.5rem;">📈 Taxa Conformidade</h3>
+                <p style="font-size: 2.5rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">{{ taxa_conformidade_geral|floatformat:1 }}%</p>
+                <small style="color: #666;">Processos sem não-conformidades ativas</small>
+            </div>
+
+            <div class="card" style="border-left: 5px solid #3498db; background: linear-gradient(135deg, #eef5fb 0%, #ffffff 100%);">
+                <h3 style="margin: 0 0 0.5rem 0; color: #3498db; display: flex; align-items: center; gap: 0.5rem;">✓ HACCP Conformidade</h3>
+                <p style="font-size: 2.5rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">{{ taxa_conformidade_haccp|floatformat:1 }}%</p>
+                <small style="color: #666;">{{ total_registros_haccp }} registros | ⚠️ {{ registros_nao_conformes }} desvios</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SEÇÃO 1.5: GRÁFICOS INTERATIVOS PLOTLY ===== -->
+    <!-- ===== SEÇÃO 1.5: GRÁFICOS INTERATIVOS ===== -->
+    <div style="margin-bottom: 2.5rem;">
+        <h3 style="color: #2c3e50; border-bottom: 3px solid #9b59b6; padding-bottom: 0.5rem;">📊 Gráficos Analíticos</h3>
+        
+        <div style="background: #f0f8ff; padding: 2rem; border-radius: 8px; text-align: center; border: 2px dashed #3498db;">
+            <p style="color: #2c3e50; font-size: 1.1rem; margin: 0;">
+                📈 Gráficos interativos em desenvolvimento
+            </p>
+            <p style="color: #7f8c8d; font-size: 0.95rem; margin: 0.5rem 0 0 0;">
+                Os gráficos com dados analíticos estarão disponíveis em breve
+            </p>
+        </div>
+    </div>
+
+    <!-- ===== SEÇÃO 2: ANÁLISE DE TENDÊNCIAS NC ===== -->
+    <div style="margin-bottom: 2.5rem; background: #fefaf0; padding: 1.5rem; border-radius: 8px; border-left: 5px solid #ff9800;">
+        <h3 style="color: #e67e22; margin-top: 0;">📉 Análise de Tendência - Não Conformidades</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+            <div class="card">
+                <h4 style="margin: 0 0 1rem 0; color: #ff9800;">Últimos 7 dias</h4>
+                <p style="font-size: 2rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">{{ ncs_7_dias }}</p>
+                <p style="color: #666; margin: 0; font-size: 0.9rem;">NCs criadas</p>
+            </div>
+
+            <div class="card">
+                <h4 style="margin: 0 0 1rem 0; color: #ff9800;">Dias 7-14</h4>
+                <p style="font-size: 2rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">{{ ncs_14_dias }}</p>
+                <p style="color: #666; margin: 0; font-size: 0.9rem;">NCs criadas</p>
+            </div>
+
+            <div class="card">
+                <h4 style="margin: 0 0 1rem 0; color: #ff9800;">Dias 14-30</h4>
+                <p style="font-size: 2rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">{{ ncs_30_dias }}</p>
+                <p style="color: #666; margin: 0; font-size: 0.9rem;">NCs criadas</p>
+            </div>
+
+            <div class="card" style="border: 2px solid #ff9800; background: {% if tendencia_nc == 'crescente' %}#ffe8d6{% elif tendencia_nc == 'decrescente' %}#d4edda{% else %}#f0f0f0{% endif %};">
+                <h4 style="margin: 0 0 1rem 0; color: #ff9800;">📊 Tendência</h4>
+                <p style="font-size: 2rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">
+                    {% if tendencia_nc == 'crescente' %}
+                        ⬆️ Crescente
+                    {% elif tendencia_nc == 'decrescente' %}
+                        ⬇️ Decrescente
+                    {% else %}
+                        ➡️ Estável
+                    {% endif %}
+                </p>
+                <p style="color: #666; margin: 0; font-size: 0.85rem;">
+                    {% if tendencia_nc == 'crescente' %}
+                        <span style="color: #dc3545;"><strong>⚠️ Atenção:</strong> NCs aumentando</span>
+                    {% elif tendencia_nc == 'decrescente' %}
+                        <span style="color: #28a745;"><strong>✓ Bom:</strong> NCs diminuindo</span>
+                    {% else %}
+                        <span style="color: #666;"><strong>ℹ️</strong> NCs estáveis</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+            <h4>Distribuição por Severidade:</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div style="background: #dc3545; color: white; padding: 1rem; border-radius: 4px; text-align: center;">
+                    <p style="margin: 0; font-size: 1.8rem; font-weight: bold;">{{ ncs_critica }}</p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">🔴 Críticas</p>
+                </div>
+                <div style="background: #ff9800; color: white; padding: 1rem; border-radius: 4px; text-align: center;">
+                    <p style="margin: 0; font-size: 1.8rem; font-weight: bold;">{{ ncs_alta }}</p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">🟠 Altas</p>
+                </div>
+                <div style="background: #ffc107; color: #333; padding: 1rem; border-radius: 4px; text-align: center;">
+                    <p style="margin: 0; font-size: 1.8rem; font-weight: bold;">{{ ncs_media }}</p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">🟡 Médias</p>
+                </div>
+                <div style="background: #28a745; color: white; padding: 1rem; border-radius: 4px; text-align: center;">
+                    <p style="margin: 0; font-size: 1.8rem; font-weight: bold;">{{ ncs_baixa }}</p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">🟢 Baixas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SEÇÃO 3: ANÁLISE DE TENDÊNCIAS HACCP ===== -->
+    <div style="margin-bottom: 2.5rem; background: #f0f8ff; padding: 1.5rem; border-radius: 8px; border-left: 5px solid #3498db;">
+        <h3 style="color: #2980b9; margin-top: 0;">📊 Análise de Tendência - Monitoramento HACCP</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+            <div class="card">
+                <h4 style="margin: 0 0 1rem 0; color: #3498db;">Últimos 7 dias</h4>
+                <p style="font-size: 2rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">{{ desvios_7_dias }}</p>
+                <p style="color: #666; margin: 0; font-size: 0.9rem;">Registros fora de conformidade</p>
+            </div>
+
+            <div class="card">
+                <h4 style="margin: 0 0 1rem 0; color: #3498db;">Dias 7-14</h4>
+                <p style="font-size: 2rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">{{ desvios_14_dias }}</p>
+                <p style="color: #666; margin: 0; font-size: 0.9rem;">Registros fora de conformidade</p>
+            </div>
+
+            <div class="card">
+                <h4 style="margin: 0 0 1rem 0; color: #3498db;">Dias 14-30</h4>
+                <p style="font-size: 2rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">{{ desvios_30_dias }}</p>
+                <p style="color: #666; margin: 0; font-size: 0.9rem;">Registros fora de conformidade</p>
+            </div>
+
+            <div class="card" style="border: 2px solid #3498db; background: {% if tendencia_haccp == 'piorando' %}#ffe8d6{% elif tendencia_haccp == 'melhorando' %}#d4edda{% else %}#f0f0f0{% endif %};">
+                <h4 style="margin: 0 0 1rem 0; color: #3498db;">📈 Tendência</h4>
+                <p style="font-size: 2rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">
+                    {% if tendencia_haccp == 'piorando' %}
+                        ⬆️ Piorando
+                    {% elif tendencia_haccp == 'melhorando' %}
+                        ⬇️ Melhorando
+                    {% else %}
+                        ➡️ Estável
+                    {% endif %}
+                </p>
+                <p style="color: #666; margin: 0; font-size: 0.85rem;">
+                    {% if tendencia_haccp == 'piorando' %}
+                        <span style="color: #dc3545;"><strong>⚠️ Crítico:</strong> Desvios aumentando</span>
+                    {% elif tendencia_haccp == 'melhorando' %}
+                        <span style="color: #28a745;"><strong>✓ Excelente:</strong> Controle melhorando</span>
+                    {% else %}
+                        <span style="color: #666;"><strong>ℹ️</strong> Desvios estáveis</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SEÇÃO 4: STATUS GERAL ===== -->
+    <div style="margin-bottom: 2.5rem;">
+        <h3 style="color: #2c3e50; border-bottom: 3px solid #e74c3c; padding-bottom: 0.5rem;">⚡ Status Atual</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+            <div class="card" style="border-left: 5px solid #e74c3c; background: #fadbd8;">
+                <h4 style="margin: 0 0 0.5rem 0; color: #e74c3c; display: flex; align-items: center; gap: 0.5rem;">⚠️ NCs Ativas</h4>
+                <p style="font-size: 2.5rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">{{ ncs_ativas }}</p>
+                <small style="color: #666;">
+                    {% if ncs_criticas_ativas > 0 %}
+                        🔴 {{ ncs_criticas_ativas }} críticas - AÇÃO IMEDIATA!
+                    {% else %}
+                        ✓ Sem críticas
+                    {% endif %}
+                </small>
+            </div>
+
+            <div class="card" style="border-left: 5px solid #f39c12; background: #fef5e7;">
+                <h4 style="margin: 0 0 0.5rem 0; color: #f39c12; display: flex; align-items: center; gap: 0.5rem;">🔧 CAPAs Pendentes</h4>
+                <p style="font-size: 2.5rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">{{ capas_pendentes }}</p>
+                <small style="color: #666;">✓ {{ capas_concluidas }} concluídas</small>
+            </div>
+
+            <div class="card" style="border-left: 5px solid #27ae60; background: #d5f4e6;">
+                <h4 style="margin: 0 0 0.5rem 0; color: #27ae60; display: flex; align-items: center; gap: 0.5rem;">🏆 Performance</h4>
+                <p style="font-size: 2.5rem; margin: 1rem 0 0.5rem 0; font-weight: bold;">
+                    {% if taxa_conformidade_geral > 90 %}
+                        A+
+                    {% elif taxa_conformidade_geral > 80 %}
+                        A
+                    {% elif taxa_conformidade_geral > 70 %}
+                        B+
+                    {% else %}
+                        C
+                    {% endif %}
+                </p>
+                <small style="color: #666;">Sistema com {{ taxa_conformidade_geral|floatformat:0 }}% de conformidade</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SEÇÃO 5: NCs NÃO RESOLVIDAS ===== -->
+    {% if ncs_antigas %}
+    <div style="margin-bottom: 2.5rem;">
+        <h3 style="color: #c0392b; border-bottom: 3px solid #c0392b; padding-bottom: 0.5rem;">🚨 NCs Pendentes há Mais Tempo</h3>
+        <div style="margin-top: 1rem;">
+            {% for nc in ncs_antigas %}
+            <div class="card" style="margin-bottom: 1rem; border-left: 4px solid {% if nc.severidade == 'critica' %}#dc3545{% elif nc.severidade == 'alta' %}#ff9800{% elif nc.severidade == 'media' %}#ffc107{% else %}#28a745{% endif %};">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <h4 style="margin: 0 0 0.5rem 0;">NC-{{ nc.id }}: {{ nc.titulo }}</h4>
+                        <p style="color: #666; margin: 0 0 0.5rem 0; font-size: 0.9rem;">{{ nc.descricao|truncatewords:20 }}</p>
+                        <small style="color: #999;">Criada: {{ nc.data_criacao|date:"d/m/Y H:i" }} (há {{ nc.data_criacao|timesince }})</small>
+                    </div>
+                    <a href="{% url 'process:detalhe_nc' cervejaria.id nc.id %}" class="btn btn-sm btn-primary" style="white-space: nowrap;">Ver Detalhes</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ===== SEÇÃO 6: ÚLTIMAS ATIVIDADES ===== -->
+    <div style="margin-bottom: 2.5rem;">
+        <h3 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 0.5rem;">📋 Últimas Não Conformidades</h3>
+        {% if ultimas_ncs %}
+            <table class="table" style="margin-top: 1rem;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Severidade</th>
+                        <th>Status</th>
+                        <th>Criada em</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for nc in ultimas_ncs %}
+                    <tr>
+                        <td><strong>NC-{{ nc.id }}</strong></td>
+                        <td>{{ nc.titulo|truncatewords:5 }}</td>
+                        <td>
+                            {% if nc.severidade == 'critica' %}
+                                <span class="badge" style="background: #dc3545; color: white; padding: 0.5rem 1rem;">🔴 Crítica</span>
+                            {% elif nc.severidade == 'alta' %}
+                                <span class="badge" style="background: #ff9800; color: white; padding: 0.5rem 1rem;">🟠 Alta</span>
+                            {% elif nc.severidade == 'media' %}
+                                <span class="badge" style="background: #ffc107; color: #333; padding: 0.5rem 1rem;">🟡 Média</span>
+                            {% else %}
+                                <span class="badge" style="background: #28a745; color: white; padding: 0.5rem 1rem;">🟢 Baixa</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if nc.status == 'aberta' %}
+                                <span style="color: #dc3545; font-weight: bold;">🔴 Aberta</span>
+                            {% elif nc.status == 'em_analise' %}
+                                <span style="color: #ff9800; font-weight: bold;">🟠 Em Análise</span>
+                            {% elif nc.status == 'em_correcao' %}
+                                <span style="color: #ffc107; font-weight: bold;">🟡 Em Correção</span>
+                            {% else %}
+                                <span style="color: #28a745; font-weight: bold;">✓ Fechada</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ nc.data_criacao|date:"d/m/Y" }}</td>
+                        <td>
+                            <a href="{% url 'process:detalhe_nc' cervejaria.id nc.id %}" style="color: #3498db; text-decoration: none; font-weight: bold;">→</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 2rem; background: #d4edda; border: 2px solid #28a745;">
+                <p style="color: #155724; margin: 0; font-size: 1.1rem;">✓ Nenhuma não conformidade registrada!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Links rápidos -->
+    <div style="margin-top: 2rem; background: #ecf0f1; padding: 1.5rem; border-radius: 8px;">
+        <h3 style="margin-top: 0; color: #2c3e50;">⚡ Ações Rápidas</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+            <a href="{% url 'process:nao_conformidades' cervejaria.id %}" class="btn btn-secondary" style="text-align: center; padding: 1rem;">📋 Gerenciar NCs</a>
+            <a href="{% url 'process:pontos_criticos_cervejaria' cervejaria.id %}" class="btn btn-secondary" style="text-align: center; padding: 1rem;">🎯 Pontos HACCP</a>
+            <a href="{% url 'process:dre' cervejaria.id %}" class="btn btn-secondary" style="text-align: center; padding: 1rem;">📊 Ver Relatório DRE</a>
+            <a href="{% url 'brewery:detail' cervejaria.id %}" class="btn btn-secondary" style="text-align: center; padding: 1rem;">← Voltar para Cervejaria</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

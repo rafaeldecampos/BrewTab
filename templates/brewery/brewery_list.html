@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Minhas Cervejarias - BREWTAB{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h2>Minhas Cervejarias</h2>
+    <a href="{% url 'brewery:create' %}" class="btn btn-success">+ Nova Cervejaria</a>
+</div>
+
+{% if breweries %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+        {% for brewery in breweries %}
+            <div class="card">
+                <h3>{{ brewery.name }}</h3>
+                <p style="color: #999; margin: 0.5rem 0;">
+                    <small>Criada em: <strong>{{ brewery.created_at|date:"d/m/Y" }}</strong></small>
+                </p>
+                <p style="color: #999; margin-bottom: 1rem;">
+                    <small>Última atualização: <strong>{{ brewery.updated_at|date:"d/m/Y" }}</strong></small>
+                </p>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="{% url 'brewery:detail' brewery.id %}" class="btn" style="flex: 1; text-align: center;">Ver Detalhes</a>
+                    <a href="{% url 'brewery:edit' brewery.id %}" class="btn" style="flex: 1; text-align: center;">Editar</a>
+                    <a href="{% url 'brewery:delete' brewery.id %}" class="btn btn-danger" style="flex: 1; text-align: center;">Excluir</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon" style="font-size: 3rem; color: #999;">🏭</div>
+        <h3>Nenhuma cervejaria ainda</h3>
+        <p style="margin: 0.5rem 0; color: #999;">Crie sua primeira cervejaria para começar.</p>
+        <a href="{% url 'brewery:create' %}" class="btn btn-success" style="margin-top: 1.5rem;">Criar Cervejaria</a>
+    </div>
+{% endif %}
+{% endblock %}

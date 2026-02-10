@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Pontos Críticos HACCP - {{ processo.nome }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+        <h2>Pontos Críticos HACCP</h2>
+        <p style="color: #999; margin-top: 0.5rem;">{{ processo.nome }} - {{ cervejaria.name }}</p>
+    </div>
+    <a href="{% url 'process:detail' cervejaria.id processo.id %}" class="btn btn-secondary">← Voltar</a>
+</div>
+
+<div class="content">
+    {% if processo.etapas.all %}
+        <div style="margin-bottom: 2rem;">
+            <h3>Criar Novo Ponto Crítico</h3>
+            <p style="color: #666; margin-bottom: 1rem;">Selecione uma etapa para definir um ponto crítico HACCP:</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+                {% for etapa in processo.etapas.all %}
+                <div class="card">
+                    <h4>{{ etapa.ordem }}. {{ etapa.nome }}</h4>
+                    <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0;">{{ etapa.descricao|truncatewords:15 }}</p>
+                    <a href="{% url 'process:criar_ponto_critico' cervejaria.id processo.id etapa.id %}" class="btn btn-success" style="width: 100%; text-align: center;">+ Novo Ponto Crítico</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if pontos_criticos %}
+        <h3 style="margin-top: 2rem;">Pontos Críticos Definidos</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Etapa</th>
+                    <th>Ponto Crítico</th>
+                    <th>Tipo</th>
+                    <th>Limites</th>
+                    <th>Responsável</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ponto in pontos_criticos %}
+                <tr>
+                    <td>{{ ponto.etapa.ordem }}. {{ ponto.etapa.nome }}</td>
+                    <td><strong>{{ ponto.nome }}</strong></td>
+                    <td><span class="badge badge-info">{{ ponto.get_tipo_display }}</span></td>
+                    <td>{{ ponto.limite_minimo }} - {{ ponto.limite_maximo }} {{ ponto.unidade }}</td>
+                    <td>{{ ponto.responsavel.get_full_name|default:ponto.responsavel.username }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        {% if not processo.etapas.all %}
+            <div class="card" style="text-align: center; padding: 2rem; margin-top: 2rem;">
+                <p style="color: #999; margin: 0;">Defina as etapas do processo antes de criar pontos críticos.</p>
+                <a href="{% url 'process:detail' cervejaria.id processo.id %}" class="btn btn-secondary" style="margin-top: 1rem;">Ver Processo</a>
+            </div>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 2rem; margin-top: 2rem;">
+                <p style="color: #999; margin: 0;">Nenhum ponto crítico definido para este processo.</p>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

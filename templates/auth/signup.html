@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Criar Conta - BREWTAB{% endblock %}
+
+{% block content %}
+<div class="content" style="max-width: 400px; margin: 2rem auto;">
+    <h2>Criar Conta</h2>
+    
+    <form method="post" style="margin-top: 1.5rem;">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="username">Nome de usuário:</label>
+            <input type="text" id="username" name="username" required value="{{ username }}" autofocus>
+            {% if errors.username %}
+                <div class="error-message">{{ errors.username }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="email">E-mail:</label>
+            <input type="email" id="email" name="email" required value="{{ email }}">
+            {% if errors.email %}
+                <div class="error-message">{{ errors.email }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="password">Senha:</label>
+            <input type="password" id="password" name="password" required>
+            <small style="color: #999; display: block; margin-top: 0.25rem;">Mínimo 8 caracteres</small>
+            {% if errors.password %}
+                <div class="error-message">{{ errors.password }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="password_confirm">Confirmar Senha:</label>
+            <input type="password" id="password_confirm" name="password_confirm" required>
+            {% if errors.password_confirm %}
+                <div class="error-message">{{ errors.password_confirm }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-success" style="width: 100%;">Criar Conta</button>
+    </form>
+
+    <div style="margin-top: 1.5rem; text-align: center;">
+        <p style="color: #666;">Já tem uma conta? <a href="{% url 'login' %}" style="color: #3498db; text-decoration: none;">Entrar aqui</a></p>
+    </div>
+</div>
+{% endblock %}

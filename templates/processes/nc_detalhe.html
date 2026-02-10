@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}NC-{{ nc.id }}: {{ nc.titulo }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+        <div>
+            <h2>NC-{{ nc.id }}: {{ nc.titulo }}</h2>
+            <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem;">
+                {% if nc.severidade == 'critica' %}
+                    <span class="badge" style="background: #dc3545;">{{ nc.get_severidade_display }}</span>
+                {% elif nc.severidade == 'alta' %}
+                    <span class="badge" style="background: #ff9800;">{{ nc.get_severidade_display }}</span>
+                {% elif nc.severidade == 'media' %}
+                    <span class="badge" style="background: #ffc107;">{{ nc.get_severidade_display }}</span>
+                {% else %}
+                    <span class="badge" style="background: #4caf50;">{{ nc.get_severidade_display }}</span>
+                {% endif %}
+                
+                {% if nc.status == 'aberta' %}
+                    <span style="color: #dc3545;">⚠️ Aberta</span>
+                {% elif nc.status == 'em_analise' %}
+                    <span style="color: #ff9800;">📋 Em Análise</span>
+                {% elif nc.status == 'em_correcao' %}
+                    <span style="color: #ffc107;">🔧 Em Correção</span>
+                {% else %}
+                    <span style="color: #28a745;">✓ Fechada</span>
+                {% endif %}
+            </div>
+        </div>
+        <a href="{% url 'process:nao_conformidades' cervejaria.id %}" class="btn btn-secondary">← Voltar</a>
+    </div>
+</div>
+
+<div class="content">
+    <div class="card">
+        <h3>Informações Básicas</h3>
+        <p><strong>Criado por:</strong> {{ nc.usuario_criacao.get_full_name|default:nc.usuario_criacao.username }}</p>
+        <p><strong>Data de Criação:</strong> {{ nc.data_criacao|date:"d/m/Y H:i" }}</p>
+        {% if nc.data_fechamento %}
+            <p><strong>Data de Fechamento:</strong> {{ nc.data_fechamento|date:"d/m/Y H:i" }}</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Descrição da Não Conformidade</h3>
+        <p>{{ nc.descricao|linebreaks }}</p>
+    </div>
+
+    {% if acoes_corretivas %}
+        <h3>Ações Corretivas (CAPA)</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Descrição</th>
+                    <th>Responsável</th>
+                    <th>Data Prevista</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for acao in acoes_corretivas %}
+                <tr>
+                    <td>
+                        {% if acao.tipo == 'correcao' %}
+                            <span class="badge" style="background: #dc3545;">Correção</span>
+                        {% else %}
+                            <span class="badge" style="background: #3498db;">Prevenção</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ acao.descricao|truncatewords:15 }}</td>
+                    <td>{{ acao.responsavel.get_full_name|default:acao.responsavel.username }}</td>
+                    <td>{{ acao.data_prevista|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if acao.status == 'concluida' %}
+                            <span style="color: #28a745;">✓ Concluída</span>
+                        {% elif acao.status == 'em_execucao' %}
+                            <span style="color: #ffc107;">⏳ Em Execução</span>
+                        {% elif acao.status == 'cancelada' %}
+                            <span style="color: #999;">✗ Cancelada</span>
+                        {% else %}
+                            <span style="color: #3498db;">📋 Planejada</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'process:criar_capa' cervejaria.id nc.id %}" class="btn btn-success">+ Nova Ação Corretiva (CAPA)</a>
+    </div>
+</div>
+{% endblock %}

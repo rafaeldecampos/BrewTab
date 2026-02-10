@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Criar Ação Corretiva (CAPA){% endblock %}
+
+{% block content %}
+<h2>Criar Ação Corretiva (CAPA)</h2>
+
+<div class="content" style="max-width: 700px;">
+    <div style="background: #f0f8ff; border: 1px solid #3498db; border-radius: 4px; padding: 1rem; margin-bottom: 2rem;">
+        <p style="color: #333; margin: 0;">
+            <strong>NC-{{ nc.id }}:</strong> {{ nc.titulo }}<br>
+            <strong>Cervejaria:</strong> {{ cervejaria.name }}
+        </p>
+    </div>
+
+    <form method="post" style="margin-top: 1.5rem;">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="tipo">Tipo de Ação:</label>
+            <select id="tipo" name="tipo" required>
+                <option value="">-- Selecione um tipo --</option>
+                {% for value, label in tipos %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="descricao">Descrição da Ação:</label>
+            <textarea 
+                id="descricao" 
+                name="descricao"
+                required
+                placeholder="Descreva em detalhes a ação que será tomada..."
+                rows="4"
+            ></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="data_prevista">Data Prevista de Conclusão:</label>
+            <input 
+                type="date" 
+                id="data_prevista" 
+                name="data_prevista" 
+                required
+            >
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-success">Criar CAPA</button>
+            <a href="{% url 'process:detalhe_nc' cervejaria.id nc.id %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

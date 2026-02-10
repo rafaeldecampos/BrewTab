@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}DRE - Demonstração de Resultado do Exercício{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h2>DRE - Demonstração de Resultado do Exercício</h2>
+    <p style="color: #999;">{{ cervejaria.name }} | {{ data_inicio|date:"d/m/Y" }} a {{ data_fim|date:"d/m/Y" }}</p>
+</div>
+
+<div class="content">
+    <!-- Filtro de Período -->
+    <div style="background: #f5f5f5; padding: 1rem; border-radius: 4px; margin-bottom: 2rem;">
+        <p style="margin: 0 0 0.5rem 0; color: #333;"><strong>Período do Relatório:</strong></p>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="?periodo=30" style="padding: 8px 15px; background: {% if periodo == '30' %}#3498db{% else %}#ddd{% endif %}; color: {% if periodo == '30' %}white{% else %}#333{% endif %}; border-radius: 4px; text-decoration: none;">Últimos 30 dias</a>
+            <a href="?periodo=90" style="padding: 8px 15px; background: {% if periodo == '90' %}#3498db{% else %}#ddd{% endif %}; color: {% if periodo == '90' %}white{% else %}#333{% endif %}; border-radius: 4px; text-decoration: none;">Últimos 90 dias</a>
+            <a href="?periodo=180" style="padding: 8px 15px; background: {% if periodo == '180' %}#3498db{% else %}#ddd{% endif %}; color: {% if periodo == '180' %}white{% else %}#333{% endif %}; border-radius: 4px; text-decoration: none;">Últimos 180 dias</a>
+            <a href="?periodo=365" style="padding: 8px 15px; background: {% if periodo == '365' %}#3498db{% else %}#ddd{% endif %}; color: {% if periodo == '365' %}white{% else %}#333{% endif %}; border-radius: 4px; text-decoration: none;">Últimos 365 dias</a>
+        </div>
+    </div>
+
+    <!-- Seção 1: Execução de Processos -->
+    <h3 style="margin-top: 2rem; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem;">1. EXECUÇÃO DE PROCESSOS</h3>
+    <table class="table" style="margin-top: 1rem;">
+        <tr>
+            <td><strong>Total de Processos Executados:</strong></td>
+            <td style="text-align: right; font-size: 1.2rem; color: #3498db; font-weight: bold;">{{ total_processos_executados }}</td>
+        </tr>
+        <tr>
+            <td><strong>Processos sem Não Conformidade:</strong></td>
+            <td style="text-align: right; font-size: 1.2rem; color: #28a745; font-weight: bold;">{{ processos_sem_nc }}</td>
+        </tr>
+        <tr style="background: #f0f8ff;">
+            <td><strong>Taxa de Conformidade (%):</strong></td>
+            <td style="text-align: right; font-size: 1.5rem; color: #3498db; font-weight: bold;">{{ taxa_conformidade }}%</td>
+        </tr>
+    </table>
+
+    <!-- Seção 2: Monitoramento HACCP -->
+    <h3 style="margin-top: 2rem; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem;">2. MONITORAMENTO HACCP</h3>
+    <table class="table" style="margin-top: 1rem;">
+        <tr>
+            <td><strong>Total de Registros HACCP:</strong></td>
+            <td style="text-align: right; font-size: 1.2rem; font-weight: bold;">{{ registros_haccp_conformes|add:registros_haccp_nao_conformes }}</td>
+        </tr>
+        <tr>
+            <td><strong>Registros Conformes:</strong></td>
+            <td style="text-align: right; font-size: 1.2rem; color: #28a745; font-weight: bold;">{{ registros_haccp_conformes }}</td>
+        </tr>
+        <tr style="background: #fff3cd;">
+            <td><strong>Registros Fora da Conformidade:</strong></td>
+            <td style="text-align: right; font-size: 1.2rem; color: #dc3545; font-weight: bold;">{{ registros_haccp_nao_conformes }}</td>
+        </tr>
+    </table>
+
+    <!-- Seção 3: Não Conformidades -->
+    <h3 style="margin-top: 2rem; border-bottom: 2px solid #dc3545; padding-bottom: 0.5rem;">3. NÃO CONFORMIDADES (NC)</h3>
+    <table class="table" style="margin-top: 1rem;">
+        <tr>
+            <td><strong>Total de NCs Abertas:</strong></td>
+            <td style="text-align: right; font-size: 1.2rem; color: #dc3545; font-weight: bold;">{{ total_ncs }}</td>
+        </tr>
+        <tr>
+            <td><strong>NCs Fechadas no Período:</strong></td>
+            <td style="text-align: right; font-size: 1.2rem; color: #28a745; font-weight: bold;">{{ ncs_fechadas }}</td>
+        </tr>
+        <tr style="background: #ffe6e6;">
+            <td><strong>NCs Críticas Ativas:</strong></td>
+            <td style="text-align: right; font-size: 1.2rem; color: #dc3545; font-weight: bold;">{{ ncs_criticas }}</td>
+        </tr>
+    </table>
+
+    <!-- Seção 4: Ações Corretivas -->
+    <h3 style="margin-top: 2rem; border-bottom: 2px solid #3498db; padding-bottom: 0.5rem;">4. AÇÕES CORRETIVAS (CAPA)</h3>
+    <table class="table" style="margin-top: 1rem;">
+        <tr>
+            <td><strong>Total de CAPAs:</strong></td>
+            <td style="text-align: right; font-size: 1.2rem; font-weight: bold;">{{ total_capas }}</td>
+        </tr>
+        <tr style="background: #e8f5e9;">
+            <td><strong>CAPAs Concluídas:</strong></td>
+            <td style="text-align: right; font-size: 1.2rem; color: #28a745; font-weight: bold;">{{ capas_concluidas }}</td>
+        </tr>
+    </table>
+
+    <!-- Resultado -->
+    <div style="background: #f0f8ff; border: 2px solid #3498db; border-radius: 4px; padding: 2rem; margin-top: 2rem; text-align: center;">
+        <h3 style="color: #3498db; margin: 0 0 1rem 0;">INDICADOR GERAL DE CONFORMIDADE</h3>
+        <p style="font-size: 3rem; margin: 0; color: #3498db; font-weight: bold;">{{ taxa_conformidade }}%</p>
+        <p style="color: #666; margin-top: 1rem; font-size: 0.95rem;">
+            {% if taxa_conformidade >= 95 %}
+                ✓ Excelente desempenho - Taxa acima de 95%
+            {% elif taxa_conformidade >= 85 %}
+                ✓ Bom desempenho - Taxa entre 85-95%
+            {% elif taxa_conformidade >= 75 %}
+                ⚠️ Desempenho aceitável - Taxa entre 75-85%
+            {% else %}
+                ⚠️ Desempenho a melhorar - Taxa abaixo de 75%
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Rodapé -->
+    <div style="margin-top: 3rem; border-top: 1px solid #ccc; padding-top: 1rem;">
+        <p style="color: #999; font-size: 0.9rem; margin: 0;">
+            Relatório gerado em {{ "now"|date:"d/m/Y H:i" }}<br>
+            BREWTAB - Sistema de Gestão de Cervejarias com Conformidade HACCP
+        </p>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+        <a href="{% url 'process:dashboard' cervejaria.id %}" class="btn btn-secondary">← Voltar ao Dashboard</a>
+    </div>
+</div>
+{% endblock %}

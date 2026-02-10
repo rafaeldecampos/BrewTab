@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Não Conformidades - {{ cervejaria.name }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h2>Não Conformidades</h2>
+    <a href="{% url 'process:criar_nc' cervejaria.id %}" class="btn btn-success">+ Nova NC</a>
+</div>
+
+<div class="content">
+    {% if nao_conformidades %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Severidade</th>
+                    <th>Status</th>
+                    <th>Criador</th>
+                    <th>Data de Criação</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for nc in nao_conformidades %}
+                <tr>
+                    <td><strong>NC-{{ nc.id }}</strong></td>
+                    <td>{{ nc.titulo }}</td>
+                    <td>
+                        {% if nc.severidade == 'critica' %}
+                            <span class="badge" style="background: #dc3545;">{{ nc.get_severidade_display }}</span>
+                        {% elif nc.severidade == 'alta' %}
+                            <span class="badge" style="background: #ff9800;">{{ nc.get_severidade_display }}</span>
+                        {% elif nc.severidade == 'media' %}
+                            <span class="badge" style="background: #ffc107;">{{ nc.get_severidade_display }}</span>
+                        {% else %}
+                            <span class="badge" style="background: #4caf50;">{{ nc.get_severidade_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if nc.status == 'aberta' %}
+                            <span style="color: #dc3545;">⚠️ Aberta</span>
+                        {% elif nc.status == 'em_analise' %}
+                            <span style="color: #ff9800;">📋 Em Análise</span>
+                        {% elif nc.status == 'em_correcao' %}
+                            <span style="color: #ffc107;">🔧 Em Correção</span>
+                        {% else %}
+                            <span style="color: #28a745;">✓ Fechada</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ nc.usuario_criacao.get_full_name|default:nc.usuario_criacao.username }}</td>
+                    <td>{{ nc.data_criacao|date:"d/m/Y" }}</td>
+                    <td>
+                        <a href="{% url 'process:detalhe_nc' cervejaria.id nc.id %}" style="color: #3498db; text-decoration: none;">Ver</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 2rem;">
+            <p style="color: #999; margin: 0;">Nenhuma não conformidade registrada.</p>
+            <a href="{% url 'process:criar_nc' cervejaria.id %}" class="btn btn-success" style="margin-top: 1rem;">Criar NC</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

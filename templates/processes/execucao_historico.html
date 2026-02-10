@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Histórico de Execuções - {{ processo.nome }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+        <h2>Histórico de Execuções</h2>
+        <p style="color: #999; margin-top: 0.5rem;">{{ processo.nome }} - {{ cervejaria.name }}</p>
+    </div>
+    <a href="{% url 'process:detail' cervejaria.id processo.id %}" class="btn btn-secondary">← Voltar</a>
+</div>
+
+<div class="content">
+    {% if execucoes %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Usuário</th>
+                    <th>Status</th>
+                    <th>Etapas Concluídas</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in execucoes %}
+                <tr>
+                    <td>{{ item.execucao.data_inicio|date:"d/m/Y H:i" }}</td>
+                    <td>{{ item.execucao.usuario.get_full_name|default:item.execucao.usuario.username }}</td>
+                    <td>
+                        {% if item.execucao.status == 'em_progresso' %}
+                            <span style="color: #ffc107;">⏳ Em Progresso</span>
+                        {% elif item.execucao.status == 'concluida' %}
+                            <span style="color: #28a745;">✓ Concluída</span>
+                        {% elif item.execucao.status == 'cancelada' %}
+                            <span style="color: #dc3545;">✗ Cancelada</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ item.etapas_concluidas }}/{{ item.total_etapas }}
+                    </td>
+                    <td>
+                        {% if item.execucao.status == 'concluida' %}
+                            <a href="#" style="color: #3498db; text-decoration: none;">Ver Detalhes</a>
+                        {% elif item.execucao.status == 'em_progresso' %}
+                            <a href="{% url 'process:checklist_execucao' cervejaria.id item.execucao.id %}" style="color: #3498db; text-decoration: none;">Continuar</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 2rem;">
+            <p style="color: #999; margin: 0;">Nenhuma execução registrada para este processo.</p>
+            <a href="{% url 'process:detail' cervejaria.id processo.id %}" class="btn btn-success" style="margin-top: 1rem;">Iniciar Execução</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

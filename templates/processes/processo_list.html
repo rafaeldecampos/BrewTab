@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Processos - {{ cervejaria.name }} - BREWTAB{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+        <h2>Processos (SOP) - {{ cervejaria.name }}</h2>
+        <p style="color: #999; margin-top: 0.5rem;">Processo, Operações Padrão</p>
+    </div>
+    <a href="{% url 'process:create' cervejaria.id %}" class="btn btn-success">+ Novo Processo</a>
+</div>
+
+{% if processos %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Etapas</th>
+                <th>Criado em</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for processo in processos %}
+            <tr>
+                <td><strong>{{ processo.nome }}</strong></td>
+                <td><span class="badge badge-info">{{ processo.get_categoria_display }}</span></td>
+                <td>{{ processo.etapas.count }} etapa(s)</td>
+                <td>{{ processo.criado_em|date:"d/m/Y" }}</td>
+                <td>
+                    <a href="{% url 'process:detail' cervejaria.id processo.id %}">Ver</a>
+                    <a href="{% url 'process:edit' cervejaria.id processo.id %}">Editar</a>
+                    <a href="{% url 'process:delete' cervejaria.id processo.id %}">Excluir</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon" style="font-size: 3rem; color: #999;">📋</div>
+        <h3>Nenhum processo criado</h3>
+        <p style="margin: 0.5rem 0; color: #999;">Crie seu primeiro processo para começar.</p>
+        <a href="{% url 'process:create' cervejaria.id %}" class="btn btn-success" style="margin-top: 1.5rem;">Criar Processo</a>
+    </div>
+{% endif %}
+
+<div style="margin-top: 2rem;">
+    <a href="{% url 'brewery:detail' cervejaria.id %}" class="btn btn-secondary">← Voltar para {{ cervejaria.name }}</a>
+</div>
+{% endblock %}

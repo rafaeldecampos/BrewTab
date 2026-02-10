@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Início - BREWTAB{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 40px 20px;">
+    <h1 style="font-size: 36px; margin-bottom: 20px;">Bem-vindo ao BREWTAB</h1>
+    
+    {% if user.is_authenticated %}
+        <p style="font-size: 18px; color: #666; margin-bottom: 30px;">
+            Olá, <strong>{{ user.first_name|default:user.username }}</strong>! Pronto para gerenciar sua cervejaria?
+        </p>
+        
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'brewery:list' %}" class="btn" style="padding: 12px 30px; font-size: 16px;">
+                Minhas Cervejarias
+            </a>
+            <a href="{% url 'brewery:create' %}" class="btn btn-success" style="padding: 12px 30px; font-size: 16px;">
+                Criar Cervejaria
+            </a>
+        </div>
+    {% else %}
+        <p style="font-size: 18px; color: #666; margin-bottom: 30px;">
+            A solução completa para gestão de processos de cervejaria, controle de qualidade e conformidade HACCP.
+        </p>
+        
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'signup' %}" class="btn btn-success" style="padding: 12px 30px; font-size: 16px;">
+                Começar Agora
+            </a>
+            <a href="{% url 'login' %}" class="btn btn-secondary" style="padding: 12px 30px; font-size: 16px;">
+                Já sou membro
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

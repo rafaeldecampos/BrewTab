@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if processo %}Editar{% else %}Criar{% endif %} Processo - BREWTAB{% endblock %}
+
+{% block content %}
+<h2>{% if processo %}Editar Processo{% else %}Criar Novo Processo{% endif %}</h2>
+
+<div class="content" style="max-width: 600px;">
+    <form method="post" style="margin-top: 1.5rem;">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="nome">Nome do Processo:</label>
+            <input 
+                type="text" 
+                id="nome" 
+                name="nome" 
+                required
+                value="{% if processo %}{{ processo.nome }}{% endif %}"
+                placeholder="Ex: Brassagem, Fermentação, Envase"
+                autofocus
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="categoria">Categoria:</label>
+            <select id="categoria" name="categoria" required>
+                <option value="">-- Selecione uma categoria --</option>
+                {% for value, label in categorias %}
+                    <option value="{{ value }}" {% if processo.categoria == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="descricao">Descrição (opcional):</label>
+            <textarea 
+                id="descricao" 
+                name="descricao"
+                placeholder="Descreva o propósito e detalhes do processo..."
+            >{% if processo %}{{ processo.descricao }}{% endif %}</textarea>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-success">
+                {% if processo %}Salvar Alterações{% else %}Criar Processo{% endif %}
+            </button>
+            <a href="{% url 'process:list' cervejaria.id %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

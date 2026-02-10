@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Checklist de Execução - {{ execucao.processo.nome }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+        <h2>{{ execucao.processo.nome }} - Checklist de Execução</h2>
+        <p style="color: #999; margin-top: 0.5rem;">
+            Status: <span class="badge badge-info">{{ execucao.get_status_display }}</span>
+            Iniciado em: {{ execucao.data_inicio|date:"d/m/Y H:i" }}
+        </p>
+    </div>
+</div>
+
+<div class="content" style="max-width: 900px;">
+    {% if etapas_execucao %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ordem</th>
+                    <th>Etapa</th>
+                    <th>Status</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for etapa_exec in etapas_execucao %}
+                <tr>
+                    <td><strong>{{ etapa_exec.etapa.ordem }}</strong></td>
+                    <td>
+                        <strong>{{ etapa_exec.etapa.nome }}</strong>
+                        {% if etapa_exec.etapa.descricao %}
+                            <br><small style="color: #666;">{{ etapa_exec.etapa.descricao|truncatewords:20 }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if etapa_exec.concluida %}
+                            <span style="color: #28a745;">✓ Concluída</span>
+                        {% else %}
+                            <span style="color: #ffc107;">⏳ Pendente</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not etapa_exec.concluida %}
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="marcar_etapa">
+                                <input type="hidden" name="etapa_id" value="{{ etapa_exec.id }}">
+                                <textarea name="observacoes" placeholder="Observações (opcional)" rows="1" style="width: 200px; padding: 5px; margin-right: 5px; border: 1px solid #ccc; border-radius: 3px;"></textarea>
+                                <button type="submit" class="btn btn-success" style="padding: 5px 15px;">Marcar Concluída</button>
+                            </form>
+                        {% else %}
+                            <small style="color: #999;">
+                                {% if etapa_exec.data_conclusao %}
+                                    Concluída em {{ etapa_exec.data_conclusao|date:"d/m/Y H:i" }}
+                                {% endif %}
+                            </small>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="card" style="margin-top: 2rem; background: #f0f8ff; border: 1px solid #3498db;">
+            <h3>Observações Gerais da Execução</h3>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="finalizar_execucao">
+                <textarea name="observacoes_gerais" placeholder="Anote qualquer informação relevante sobre a execução do processo..." rows="4" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: Arial;"></textarea>
+                
+                <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                    <button type="submit" class="btn btn-success">✓ Finalizar Execução</button>
+                    <a href="{% url 'process:detail' cervejaria.id execucao.processo.id %}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 2rem;">
+            <p style="color: #999; margin: 0;">Nenhuma etapa definida para este processo.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

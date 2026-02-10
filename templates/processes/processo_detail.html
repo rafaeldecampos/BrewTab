@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ processo.nome }} - BREWTAB{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+        <h2>{{ processo.nome }}</h2>
+        <p style="color: #999; margin-top: 0.5rem;">
+            <span class="badge badge-info">{{ processo.get_categoria_display }}</span>
+            &nbsp; {{ cervejaria.name }}
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+        <a href="{% url 'process:edit' cervejaria.id processo.id %}" class="btn">Editar</a>
+        <a href="{% url 'process:delete' cervejaria.id processo.id %}" class="btn btn-danger">Excluir</a>
+    </div>
+</div>
+
+{% if processo.descricao %}
+<div class="card">
+    <h3>Descrição</h3>
+    <p>{{ processo.descricao|linebreaks }}</p>
+</div>
+{% endif %}
+
+<div style="margin-top: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3>Etapas do Processo</h3>
+        <a href="{% url 'process:create_step' cervejaria.id processo.id %}" class="btn btn-success">+ Nova Etapa</a>
+    </div>
+
+    {% if etapas %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ordem</th>
+                    <th>Nome da Etapa</th>
+                    <th>Descrição</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for etapa in etapas %}
+                <tr>
+                    <td>
+                        <strong style="font-size: 1.2rem; color: #3498db;">{{ etapa.ordem }}</strong>
+                    </td>
+                    <td><strong>{{ etapa.nome }}</strong></td>
+                    <td>{{ etapa.descricao|truncatewords:20 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 2rem;">
+            <p style="color: #999; margin: 0;">Nenhuma etapa definida para este processo.</p>
+            <a href="{% url 'process:create_step' cervejaria.id processo.id %}" class="btn btn-success" style="margin-top: 1rem;">Criar Primeira Etapa</a>
+        </div>
+    {% endif %}
+</div>
+
+<div style="margin-top: 2rem;">
+    <a href="{% url 'process:list' cervejaria.id %}" class="btn btn-secondary">← Voltar para Processos</a>
+</div>
+
+<h3 style="margin-top: 3rem;">Ações Disponíveis</h3>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+    <div class="card">
+        <h4>▶️ Executar Processo</h4>
+        <p style="color: #666; font-size: 0.9rem;">Iniciar uma nova execução com checklist de etapas</p>
+        <a href="{% url 'process:iniciar_execucao' cervejaria.id processo.id %}" class="btn btn-success" style="display: inline-block; margin-top: 0.5rem; width: 100%;">Iniciar Execução</a>
+    </div>
+    
+    <div class="card">
+        <h4>📋 Histórico de Execuções</h4>
+        <p style="color: #666; font-size: 0.9rem;">Ver todas as execuções anteriores deste processo</p>
+        <a href="{% url 'process:historico_execucoes' cervejaria.id processo.id %}" class="btn btn-secondary" style="display: inline-block; margin-top: 0.5rem; width: 100%;">Ver Histórico</a>
+    </div>
+    
+    <div class="card">
+        <h4>⚠️ Pontos Críticos HACCP</h4>
+        <p style="color: #666; font-size: 0.9rem;">Gerenciar pontos críticos de controle</p>
+        <a href="{% url 'process:ponto_critico_list' cervejaria.id processo.id %}" class="btn btn-secondary" style="display: inline-block; margin-top: 0.5rem; width: 100%;">Ver Pontos Críticos</a>
+    </div>
+</div>
+{% endblock %}

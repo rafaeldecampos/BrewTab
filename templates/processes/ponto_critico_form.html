@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Ponto Crítico HACCP{% endblock %}
+
+{% block content %}
+<h2>Criar Novo Ponto Crítico HACCP</h2>
+
+<div class="content" style="max-width: 800px;">
+    <div style="background: #f0f8ff; border: 1px solid #3498db; border-radius: 4px; padding: 1rem; margin-bottom: 2rem;">
+        <p style="color: #333; margin: 0;">
+            <strong>Processo:</strong> {{ processo.nome }}<br>
+            <strong>Etapa:</strong> {{ etapa.ordem }}. {{ etapa.nome }}<br>
+            <strong>Cervejaria:</strong> {{ cervejaria.name }}
+        </p>
+    </div>
+
+    <form method="post" style="margin-top: 1.5rem;">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="tipo">Tipo de Ponto Crítico:</label>
+            <select id="tipo" name="tipo" required>
+                <option value="">-- Selecione um tipo --</option>
+                {% for value, label in tipos %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="nome">Nome do Ponto Crítico:</label>
+            <input 
+                type="text" 
+                id="nome" 
+                name="nome" 
+                required
+                placeholder="Ex: Temperatura de Pasteurização, pH da Fermentação"
+                autofocus
+            >
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="limite_minimo">Limite Mínimo:</label>
+                <input 
+                    type="number" 
+                    id="limite_minimo" 
+                    name="limite_minimo" 
+                    step="0.01"
+                    required
+                    placeholder="Ex: 72"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="limite_maximo">Limite Máximo:</label>
+                <input 
+                    type="number" 
+                    id="limite_maximo" 
+                    name="limite_maximo" 
+                    step="0.01"
+                    required
+                    placeholder="Ex: 75"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="unidade">Unidade:</label>
+                <input 
+                    type="text" 
+                    id="unidade" 
+                    name="unidade" 
+                    required
+                    placeholder="Ex: °C, pH, min"
+                >
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="acao_preventiva">Ação Preventiva:</label>
+            <textarea 
+                id="acao_preventiva" 
+                name="acao_preventiva"
+                required
+                placeholder="Descreva as ações preventivas para evitar desvios..."
+                rows="3"
+            ></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="acao_corretiva">Ação Corretiva:</label>
+            <textarea 
+                id="acao_corretiva" 
+                name="acao_corretiva"
+                required
+                placeholder="Descreva as ações corretivas caso haja desvio..."
+                rows="3"
+            ></textarea>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-success">Criar Ponto Crítico</button>
+            <a href="{% url 'process:ponto_critico_list' cervejaria.id processo.id %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

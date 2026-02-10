@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Erro 500 - BREWTAB{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 40px 20px;">
+    <h1 style="font-size: 36px; margin-bottom: 20px;">Erro interno do servidor</h1>
+    
+    <p style="font-size: 18px; color: #666; margin-bottom: 30px;">
+        Ops! Algo deu errado. Nossa equipe foi notificada e está trabalhando para resolver o problema.
+    </p>
+    
+    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+        <a href="{% url 'home' %}" class="btn" style="padding: 12px 30px; font-size: 16px;">
+            Voltar para Início
+        </a>
+        <a href="javascript:history.back()" class="btn btn-secondary" style="padding: 12px 30px; font-size: 16px;">
+            Página Anterior
+        </a>
+    </div>
+</div>
+{% endblock %}
