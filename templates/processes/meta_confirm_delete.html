@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Remover Meta - {{ cervejaria.name }}{% endblock %}
+
+{% block content %}
+<style>
+    .confirm-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+    
+    .confirm-card {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    
+    .confirm-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+        opacity: 0.7;
+    }
+    
+    h1 {
+        font-size: 24px;
+        color: #2c3e50;
+        margin-bottom: 15px;
+    }
+    
+    .confirm-message {
+        color: #666;
+        margin-bottom: 20px;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+    
+    .meta-info {
+        background-color: #ecf0f1;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 25px;
+        text-align: left;
+    }
+    
+    .meta-info-item {
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #555;
+    }
+    
+    .meta-info-label {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .confirm-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .warning-text {
+        color: #e74c3c;
+        font-size: 13px;
+        margin-top: 15px;
+        font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+        .confirm-container {
+            padding: 20px;
+        }
+        
+        .confirm-card {
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 20px;
+        }
+    }
+</style>
+
+<div class="confirm-container">
+    <div class="confirm-card">
+        <div class="confirm-icon">⚠️</div>
+        <h1>Remover Meta</h1>
+        
+        <div class="confirm-message">
+            Você tem certeza que deseja remover esta meta?
+        </div>
+        
+        <div class="meta-info">
+            <div class="meta-info-item">
+                <span class="meta-info-label">Nome:</span> {{ meta.nome }}
+            </div>
+            <div class="meta-info-item">
+                <span class="meta-info-label">Tipo:</span> {{ meta.get_tipo_display }}
+            </div>
+            <div class="meta-info-item">
+                <span class="meta-info-label">Valor da Meta:</span> {{ meta.valor_meta|floatformat:2 }} {{ meta.unidade }}
+            </div>
+            <div class="meta-info-item">
+                <span class="meta-info-label">Período:</span> {{ meta.data_inicio|date:"d/m/Y" }} até {{ meta.data_fim|date:"d/m/Y" }}
+            </div>
+        </div>
+        
+        <div class="warning-text">
+            A meta será marcada como inativa mas poderá ser reativada posteriormente consultando o histórico.
+        </div>
+        
+        <div class="confirm-actions">
+            <form method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Confirmar Remoção</button>
+            </form>
+            <a href="{% url 'process:meta_list' brewery_id=cervejaria.id %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

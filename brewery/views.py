@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.contrib import messages
 from .models import Brewery
+from processes.models import PontoCriticoHACCP
 
 
 @login_required(login_url='login')
@@ -41,7 +42,13 @@ def brewery_detail(request, brewery_id):
     if brewery.owner != request.user:
         return HttpResponseForbidden('You do not have permission to view this brewery.')
     
-    return render(request, 'brewery/brewery_detail.html', {'brewery': brewery})
+    # contar pontos críticos HACCP desta cervejaria para continuidade da etapa
+    total_pontos = PontoCriticoHACCP.objects.filter(processo__cervejaria=brewery).count()
+
+    return render(request, 'brewery/brewery_detail.html', {
+        'brewery': brewery,
+        'total_pontos': total_pontos
+    })
 
 
 @login_required(login_url='login')

@@ -101,6 +101,41 @@
         </p>
     </div>
 
+    <!-- Seção 5: Gráficos Analíticos -->
+    <h3 style="margin-top: 2.5rem; border-bottom: 2px solid #1abc9c; padding-bottom: 0.5rem;">5. ANÁLISE VISUAL - GRÁFICOS INTERATIVOS</h3>
+    
+    <div style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 2rem;">
+        <!-- Gráfico: Receita vs Custos -->
+        {% if grafico_dre_receita_custos %}
+        <div style="background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div id="grafico-dre-receita"></div>
+            <script>
+                var dados_receita = {{ grafico_dre_receita_custos|safe }};
+                setTimeout(function() {
+                    if (Object.keys(dados_receita).length > 0 && typeof Plotly !== 'undefined') {
+                        Plotly.newPlot('grafico-dre-receita', dados_receita.data, dados_receita.layout, {responsive: true});
+                    }
+                }, 100);
+            </script>
+        </div>
+        {% endif %}
+        
+        <!-- Gráfico: Metas vs Real -->
+        {% if grafico_dre_metas_vs_real %}
+        <div style="background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div id="grafico-dre-metas"></div>
+            <script>
+                var dados_metas_dre = {{ grafico_dre_metas_vs_real|safe }};
+                setTimeout(function() {
+                    if (Object.keys(dados_metas_dre).length > 0 && typeof Plotly !== 'undefined') {
+                        Plotly.newPlot('grafico-dre-metas', dados_metas_dre.data, dados_metas_dre.layout, {responsive: true});
+                    }
+                }, 100);
+            </script>
+        </div>
+        {% endif %}
+    </div>
+
     <!-- Rodapé -->
     <div style="margin-top: 3rem; border-top: 1px solid #ccc; padding-top: 1rem;">
         <p style="color: #999; font-size: 0.9rem; margin: 0;">

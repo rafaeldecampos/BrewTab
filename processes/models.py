@@ -274,3 +274,42 @@ class KPIExercicio(models.Model):
     def __str__(self):
         return f"KPI {self.cervejaria.name} ({self.data_inicio.strftime('%d/%m/%Y')} a {self.data_fim.strftime('%d/%m/%Y')})"
 
+
+# ===== METAS / OBJETIVOS =====
+
+class Meta(models.Model):
+    """Metas e objetivos de desempenho para a cervejaria"""
+    TIPO_CHOICES = [
+        ('lucro', 'Lucro Alvo'),
+        ('producao', 'Meta de Produção'),
+        ('orcamento', 'Orçamento'),
+        ('qualidade', 'Meta de Qualidade'),
+    ]
+
+    cervejaria = models.ForeignKey(Brewery, on_delete=models.CASCADE, related_name='metas', verbose_name='Cervejaria')
+    nome = models.CharField(max_length=255, verbose_name='Nome da Meta')
+    tipo = models.CharField(max_length=50, choices=TIPO_CHOICES, verbose_name='Tipo de Meta')
+    valor_meta = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Valor da Meta')
+    valor_atual = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name='Valor Atual')
+    unidade = models.CharField(max_length=50, default='R$', verbose_name='Unidade (R$, kg, %, etc)')
+    data_inicio = models.DateField(verbose_name='Data de Início')
+    data_fim = models.DateField(verbose_name='Data de Término')
+    usuario = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='Responsável')
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
+    criado_em = models.DateTimeField(auto_now_add=True, verbose_name='Criado em')
+    atualizado_em = models.DateTimeField(auto_now=True, verbose_name='Atualizado em')
+
+    class Meta:
+        verbose_name = 'Meta'
+        verbose_name_plural = 'Metas'
+        ordering = ['-criado_em']
+
+    def __str__(self):
+        percentual = (float(self.valor_atual) / float(self.valor_meta) * 100) if self.valor_meta else 0
+        return f"{self.nome} ({self.get_tipo_display()}) - {self.valor_atual} / {self.valor_meta} {self.unidade} ({percentual:.1f}%)"
+    
+    def percentual_conclusao(self):
+        """Calcula percentual de conclusão da meta"""
+        if self.valor_meta == 0:
+            return 0
+        return min((float(self.valor_atual) / float(self.valor_meta)) * 100, 100)

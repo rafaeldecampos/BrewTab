@@ -28,10 +28,11 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'change-me-replace-in-productio
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
     "brewtab.onrender.com",
     "brewtab.online"
 ]
-
 # Application definition
 
 INSTALLED_APPS = [

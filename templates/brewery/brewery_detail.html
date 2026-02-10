@@ -43,14 +43,24 @@
     <div class="card">
         <h3>✓ Pontos HACCP</h3>
         <p style="color: #666;">Definir Pontos Críticos de Controle</p>
-        <p style="color: #999; margin: 0.5rem 0;"><small>Disponível na Etapa 5</small></p>
+        {% if total_pontos and total_pontos > 0 %}
+            <p style="color: #999; margin: 0.5rem 0;"><small>{{ total_pontos }} ponto(s) definidos</small></p>
+            <a href="{% url 'process:pontos_criticos_cervejaria' brewery.id %}" class="btn btn-secondary" style="display:inline-block; margin-top:0.5rem;">Continuar</a>
+        {% else %}
+            <p style="color: #999; margin: 0.5rem 0;"><small>Disponível na Etapa 5</small></p>
+            <a href="{% url 'process:list' brewery.id %}" class="btn btn-secondary" style="display:inline-block; margin-top:0.5rem;">Ir para Processos</a>
+        {% endif %}
     </div>
     <div class="card">
         <h3>📊 Dashboard</h3>
         <p style="color: #666;">Visualizar KPIs e indicadores de desempenho</p>
         <a href="{% url 'process:dashboard' brewery.id %}" class="btn btn-secondary" style="display: inline-block; margin-top: 0.5rem;">Acessar Dashboard</a>
     </div>
-</div>
+    <div class="card">
+        <h3>🎯 Metas</h3>
+        <p style="color: #666;">Definir e acompanhar objetivos de negócio</p>
+        <a href="{% url 'process:meta_list' brewery.id %}" class="btn btn-secondary" style="display: inline-block; margin-top: 0.5rem;">Gerenciar Metas</a>
+    </div></div>
 
 <div style="margin-top: 2rem;">
     <a href="{% url 'brewery:list' %}" class="btn btn-secondary">← Voltar para Cervejarias</a>

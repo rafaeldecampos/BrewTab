@@ -35,4 +35,9 @@ urlpatterns = [
     # ETAPA 8: Dashboard e Relatórios
     path('cervejaria/<int:brewery_id>/dashboard/', views.dashboard_cervejaria, name='dashboard'),
     path('cervejaria/<int:brewery_id>/dre/', views.relatorio_dre, name='dre'),
-]
+    
+    # Metas / Objetivos
+    path('cervejaria/<int:brewery_id>/metas/', views.listar_metas, name='meta_list'),
+    path('cervejaria/<int:brewery_id>/metas/criar/', views.criar_meta, name='criar_meta'),
+    path('cervejaria/<int:brewery_id>/metas/<int:meta_id>/editar/', views.editar_meta, name='editar_meta'),
+    path('cervejaria/<int:brewery_id>/metas/<int:meta_id>/deletar/', views.deletar_meta, name='deletar_meta'),]

@@ -10,7 +10,18 @@ from brewery.models import Brewery
 from .models import (
     Processo, EtapaProcesso, ExecutacaoProcesso, ExecucaoEtapa, 
     HistoricoExecucao, PontoCriticoHACCP, RegistroHACCP, NaoConformidade, 
-    AcaoCorretiva, KPIExercicio
+    AcaoCorretiva, KPIExercicio, Meta
+)
+from .plotly_utils import (
+    gerar_grafico_metas_comparacao,
+    gerar_grafico_metas_progresso,
+    gerar_grafico_nc_por_severidade,
+    gerar_grafico_nc_tendencia,
+    gerar_grafico_haccp_conformidade,
+    gerar_grafico_execucoes_status,
+    gerar_grafico_dre_receita_custos,
+    gerar_grafico_dre_metas_vs_real,
+    gerar_grafico_kpi_resumo
 )
 
 
@@ -764,6 +775,22 @@ def dashboard_cervejaria(request, brewery_id):
         status__in=['aberta', 'em_analise', 'em_correcao']
     ).order_by('data_criacao')[:3]
     
+    # Metas ativas
+    metas_ativas = Meta.objects.filter(cervejaria=cervejaria, ativo=True).order_by('-criado_em')
+    
+    # Calcular percentual para cada meta
+    for meta in metas_ativas:
+        meta.percentual = meta.percentual_conclusao()
+    
+    # ===== GRÁFICOS PLOTLY =====
+    grafico_metas_comparacao = gerar_grafico_metas_comparacao(cervejaria)
+    grafico_metas_progresso = gerar_grafico_metas_progresso(cervejaria)
+    grafico_nc_severidade = gerar_grafico_nc_por_severidade(cervejaria)
+    grafico_nc_tendencia = gerar_grafico_nc_tendencia(cervejaria)
+    grafico_haccp = gerar_grafico_haccp_conformidade(cervejaria)
+    grafico_execucoes = gerar_grafico_execucoes_status(cervejaria)
+    grafico_kpi = gerar_grafico_kpi_resumo(cervejaria)
+    
     return render(request, 'processes/dashboard.html', {
         'cervejaria': cervejaria,
         'total_processos': total_processos,
@@ -793,6 +820,15 @@ def dashboard_cervejaria(request, brewery_id):
         'taxa_conformidade_haccp': taxa_conformidade_haccp,
         'taxa_conformidade_geral': taxa_conformidade_geral,
         'ncs_antigas': ncs_antigas,
+        'metas': metas_ativas,
+        # Gráficos Plotly
+        'grafico_metas_comparacao': grafico_metas_comparacao,
+        'grafico_metas_progresso': grafico_metas_progresso,
+        'grafico_nc_severidade': grafico_nc_severidade,
+        'grafico_nc_tendencia': grafico_nc_tendencia,
+        'grafico_haccp': grafico_haccp,
+        'grafico_execucoes': grafico_execucoes,
+        'grafico_kpi': grafico_kpi,
     })
 
 
@@ -859,6 +895,10 @@ def relatorio_dre(request, brewery_id):
     )
     capas_concluidas = capas.filter(status='concluida').count()
     
+    # ===== GRÁFICOS PLOTLY PARA DRE =====
+    grafico_dre_receita_custos = gerar_grafico_dre_receita_custos(cervejaria, int(periodo))
+    grafico_dre_metas_vs_real = gerar_grafico_dre_metas_vs_real(cervejaria)
+    
     return render(request, 'processes/relatorio_dre.html', {
         'cervejaria': cervejaria,
         'periodo': periodo,
@@ -874,5 +914,176 @@ def relatorio_dre(request, brewery_id):
         'ncs_fechadas': ncs_fechadas,
         'ncs_criticas': ncs_criticas,
         'total_capas': capas.count(),
-        'capas_concluidas': capas_concluidas
+        'capas_concluidas': capas_concluidas,
+        # Gráficos Plotly
+        'grafico_dre_receita_custos': grafico_dre_receita_custos,
+        'grafico_dre_metas_vs_real': grafico_dre_metas_vs_real,
+    })
+
+# ===== METAS / OBJETIVOS =====
+
+@login_required(login_url='login')
+def listar_metas(request, brewery_id):
+    """Lista todas as metas de uma cervejaria."""
+    cervejaria = get_object_or_404(Brewery, id=brewery_id)
+    
+    if not verifica_propriedade_cervejaria(request.user, cervejaria):
+        return HttpResponseForbidden('Você não tem permissão para acessar esta cervejaria.')
+    
+    metas = Meta.objects.filter(cervejaria=cervejaria, ativo=True).order_by('-criado_em')
+    
+    # Adiciona percentual de conclusão a cada meta
+    for meta in metas:
+        meta.percentual = meta.percentual_conclusao()
+    
+    return render(request, 'processes/meta_list.html', {
+        'cervejaria': cervejaria,
+        'metas': metas,
+        'tipos': Meta.TIPO_CHOICES
+    })
+
+
+@login_required(login_url='login')
+def criar_meta(request, brewery_id):
+    """Cria uma nova meta para a cervejaria."""
+    cervejaria = get_object_or_404(Brewery, id=brewery_id)
+    
+    if not verifica_propriedade_cervejaria(request.user, cervejaria):
+        return HttpResponseForbidden('Você não tem permissão para acessar esta cervejaria.')
+    
+    if request.method == 'POST':
+        nome = request.POST.get('nome', '').strip()
+        tipo = request.POST.get('tipo', '').strip()
+        valor_meta = request.POST.get('valor_meta', '').strip()
+        unidade = request.POST.get('unidade', 'R$').strip()
+        data_inicio = request.POST.get('data_inicio', '').strip()
+        data_fim = request.POST.get('data_fim', '').strip()
+        
+        # Validações
+        if not nome:
+            messages.error(request, 'Nome da meta é obrigatório.')
+        elif not tipo:
+            messages.error(request, 'Tipo de meta é obrigatório.')
+        elif not valor_meta:
+            messages.error(request, 'Valor da meta é obrigatório.')
+        elif not data_inicio:
+            messages.error(request, 'Data de início é obrigatória.')
+        elif not data_fim:
+            messages.error(request, 'Data de término é obrigatória.')
+        else:
+            try:
+                valor_meta_decimal = float(valor_meta)
+                if valor_meta_decimal <= 0:
+                    messages.error(request, 'Valor da meta deve ser maior que zero.')
+                else:
+                    meta = Meta.objects.create(
+                        cervejaria=cervejaria,
+                        nome=nome,
+                        tipo=tipo,
+                        valor_meta=valor_meta_decimal,
+                        unidade=unidade,
+                        data_inicio=data_inicio,
+                        data_fim=data_fim,
+                        usuario=request.user
+                    )
+                    messages.success(request, f'Meta "{meta.nome}" criada com sucesso.')
+                    return redirect('process:meta_list', brewery_id=cervejaria.id)
+            except ValueError:
+                messages.error(request, 'Valor da meta deve ser um número válido.')
+        
+        return render(request, 'processes/meta_form.html', {
+            'cervejaria': cervejaria,
+            'tipos': Meta.TIPO_CHOICES
+        })
+    
+    return render(request, 'processes/meta_form.html', {
+        'cervejaria': cervejaria,
+        'tipos': Meta.TIPO_CHOICES
+    })
+
+
+@login_required(login_url='login')
+def editar_meta(request, brewery_id, meta_id):
+    """Edita uma meta existente."""
+    cervejaria = get_object_or_404(Brewery, id=brewery_id)
+    meta = get_object_or_404(Meta, id=meta_id, cervejaria=cervejaria)
+    
+    if not verifica_propriedade_cervejaria(request.user, cervejaria):
+        return HttpResponseForbidden('Você não tem permissão para acessar esta cervejaria.')
+    
+    if request.method == 'POST':
+        nome = request.POST.get('nome', '').strip()
+        tipo = request.POST.get('tipo', '').strip()
+        valor_meta = request.POST.get('valor_meta', '').strip()
+        valor_atual = request.POST.get('valor_atual', '').strip()
+        unidade = request.POST.get('unidade', 'R$').strip()
+        data_inicio = request.POST.get('data_inicio', '').strip()
+        data_fim = request.POST.get('data_fim', '').strip()
+        ativo = request.POST.get('ativo', 'on') == 'on'
+        
+        # Validações
+        if not nome:
+            messages.error(request, 'Nome da meta é obrigatório.')
+        elif not tipo:
+            messages.error(request, 'Tipo de meta é obrigatório.')
+        elif not valor_meta:
+            messages.error(request, 'Valor da meta é obrigatório.')
+        elif not data_inicio:
+            messages.error(request, 'Data de início é obrigatória.')
+        elif not data_fim:
+            messages.error(request, 'Data de término é obrigatória.')
+        else:
+            try:
+                valor_meta_decimal = float(valor_meta)
+                valor_atual_decimal = float(valor_atual) if valor_atual else 0
+                
+                if valor_meta_decimal <= 0:
+                    messages.error(request, 'Valor da meta deve ser maior que zero.')
+                else:
+                    meta.nome = nome
+                    meta.tipo = tipo
+                    meta.valor_meta = valor_meta_decimal
+                    meta.valor_atual = valor_atual_decimal
+                    meta.unidade = unidade
+                    meta.data_inicio = data_inicio
+                    meta.data_fim = data_fim
+                    meta.ativo = ativo
+                    meta.save()
+                    messages.success(request, f'Meta "{meta.nome}" atualizada com sucesso.')
+                    return redirect('process:meta_list', brewery_id=cervejaria.id)
+            except ValueError:
+                messages.error(request, 'Valores devem ser números válidos.')
+        
+        return render(request, 'processes/meta_form.html', {
+            'cervejaria': cervejaria,
+            'meta': meta,
+            'tipos': Meta.TIPO_CHOICES
+        })
+    
+    return render(request, 'processes/meta_form.html', {
+        'cervejaria': cervejaria,
+        'meta': meta,
+        'tipos': Meta.TIPO_CHOICES
+    })
+
+
+@login_required(login_url='login')
+def deletar_meta(request, brewery_id, meta_id):
+    """Marca uma meta como inativa (soft delete)."""
+    cervejaria = get_object_or_404(Brewery, id=brewery_id)
+    meta = get_object_or_404(Meta, id=meta_id, cervejaria=cervejaria)
+    
+    if not verifica_propriedade_cervejaria(request.user, cervejaria):
+        return HttpResponseForbidden('Você não tem permissão para acessar esta cervejaria.')
+    
+    if request.method == 'POST':
+        nome_meta = meta.nome
+        meta.ativo = False
+        meta.save()
+        messages.success(request, f'Meta "{nome_meta}" removida com sucesso.')
+        return redirect('process:meta_list', brewery_id=cervejaria.id)
+    
+    return render(request, 'processes/meta_confirm_delete.html', {
+        'cervejaria': cervejaria,
+        'meta': meta
     })

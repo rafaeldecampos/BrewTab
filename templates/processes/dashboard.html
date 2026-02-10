@@ -2,10 +2,6 @@
 
 {% block title %}Dashboard - {{ cervejaria.name }}{% endblock %}
 
-{% block extra_scripts %}
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-{% endblock %}
-
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
     <div>
@@ -52,15 +48,145 @@
     <!-- ===== SEÇÃO 1.5: GRÁFICOS INTERATIVOS PLOTLY ===== -->
     <!-- ===== SEÇÃO 1.5: GRÁFICOS INTERATIVOS ===== -->
     <div style="margin-bottom: 2.5rem;">
-        <h3 style="color: #2c3e50; border-bottom: 3px solid #9b59b6; padding-bottom: 0.5rem;">📊 Gráficos Analíticos</h3>
+        <h3 style="color: #2c3e50; border-bottom: 3px solid #9b59b6; padding-bottom: 0.5rem;">🎯 Metas e Objetivos</h3>
         
-        <div style="background: #f0f8ff; padding: 2rem; border-radius: 8px; text-align: center; border: 2px dashed #3498db;">
-            <p style="color: #2c3e50; font-size: 1.1rem; margin: 0;">
-                📈 Gráficos interativos em desenvolvimento
-            </p>
-            <p style="color: #7f8c8d; font-size: 0.95rem; margin: 0.5rem 0 0 0;">
-                Os gráficos com dados analíticos estarão disponíveis em breve
-            </p>
+        {% if metas %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                {% for meta in metas %}
+                <div class="card" style="border: 2px solid #9b59b6;">
+                    <h4 style="margin: 0 0 0.5rem 0; color: #9b59b6;">{{ meta.nome }}</h4>
+                    <p style="color: #666; font-size: 0.9rem; margin: 0 0 1rem 0;">{{ meta.get_tipo_display }}</p>
+                    
+                    <div style="margin: 1rem 0;">
+                        <div style="background-color: #ecf0f1; border-radius: 8px; height: 20px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #9b59b6, #8e44ad); height: 100%; width: {{ meta.percentual }}%; transition: width 0.3s ease;"></div>
+                        </div>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #666;">
+                            <strong>{{ meta.percentual|floatformat:1 }}%</strong> - {{ meta.valor_atual|floatformat:2 }} / {{ meta.valor_meta|floatformat:2 }} {{ meta.unidade }}
+                        </p>
+                    </div>
+                    
+                    <p style="color: #999; font-size: 0.8rem; margin: 1rem 0 0 0;">
+                        {{ meta.data_inicio|date:"d/m/Y" }} a {{ meta.data_fim|date:"d/m/Y" }}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div style="margin-top: 1.5rem;">
+                <a href="{% url 'process:meta_list' cervejaria.id %}" class="btn btn-secondary">Gerenciar Metas</a>
+            </div>
+        {% else %}
+            <div style="background: #f0f8ff; padding: 2rem; border-radius: 8px; text-align: center; border: 2px dashed #9b59b6; margin-top: 1.5rem;">
+                <p style="color: #2c3e50; font-size: 1rem; margin: 0;">
+                    📈 Nenhuma meta criada ainda
+                </p>
+                <p style="color: #7f8c8d; font-size: 0.95rem; margin: 0.5rem 0 1rem 0;">
+                    Crie metas para acompanhar seus objetivos de negócio
+                </p>
+                <a href="{% url 'process:meta_list' cervejaria.id %}" class="btn btn-secondary">Criar Metas</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- ===== SEÇÃO 1.6: GRÁFICOS ANALÍTICOS PLOTLY ===== -->
+    <div style="margin-bottom: 2.5rem;">
+        <h3 style="color: #2c3e50; border-bottom: 3px solid #1abc9c; padding-bottom: 0.5rem;">📊 Gráficos Analíticos</h3>
+        
+        <div style="margin-top: 1.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 2rem;">
+            <!-- Gráfico: Metas Comparação -->
+            {% if grafico_metas_comparacao %}
+            <div style="background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div id="grafico-metas-comparacao"></div>
+                <script>
+                    var dados_metas = {{ grafico_metas_comparacao|safe }};
+                    setTimeout(function() {
+                        if (Object.keys(dados_metas).length > 0 && typeof Plotly !== 'undefined') {
+                            Plotly.newPlot('grafico-metas-comparacao', dados_metas.data, dados_metas.layout, {responsive: true});
+                        }
+                    }, 100);
+                </script>
+            </div>
+            {% endif %}
+            
+            <!-- Gráfico: Metas Progresso -->
+            {% if grafico_metas_progresso %}
+            <div style="background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div id="grafico-metas-progresso"></div>
+                <script>
+                    var dados_progresso = {{ grafico_metas_progresso|safe }};
+                    setTimeout(function() {
+                        if (Object.keys(dados_progresso).length > 0 && typeof Plotly !== 'undefined') {
+                            Plotly.newPlot('grafico-metas-progresso', dados_progresso.data, dados_progresso.layout, {responsive: true});
+                        }
+                    }, 100);
+                </script>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 2rem;">
+            <!-- Gráfico: NCs por Severidade -->
+            {% if grafico_nc_severidade %}
+            <div style="background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div id="grafico-nc-severidade"></div>
+                <script>
+                    var dados_nc = {{ grafico_nc_severidade|safe }};
+                    setTimeout(function() {
+                        if (Object.keys(dados_nc).length > 0 && typeof Plotly !== 'undefined') {
+                            Plotly.newPlot('grafico-nc-severidade', dados_nc.data, dados_nc.layout, {responsive: true});
+                        }
+                    }, 100);
+                </script>
+            </div>
+            {% endif %}
+            
+            <!-- Gráfico: Tendência NCs -->
+            {% if grafico_nc_tendencia %}
+            <div style="background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div id="grafico-nc-tendencia"></div>
+                <script>
+                    var dados_tendencia = {{ grafico_nc_tendencia|safe }};
+                    setTimeout(function() {
+                        if (Object.keys(dados_tendencia).length > 0 && typeof Plotly !== 'undefined') {
+                            Plotly.newPlot('grafico-nc-tendencia', dados_tendencia.data, dados_tendencia.layout, {responsive: true});
+                        }
+                    }, 100);
+                </script>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 2rem;">
+            <!-- Gráfico: Conformidade HACCP -->
+            {% if grafico_haccp %}
+            <div style="background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div id="grafico-haccp"></div>
+                <script>
+                    var dados_haccp = {{ grafico_haccp|safe }};
+                    setTimeout(function() {
+                        if (Object.keys(dados_haccp).length > 0 && typeof Plotly !== 'undefined') {
+                            Plotly.newPlot('grafico-haccp', dados_haccp.data, dados_haccp.layout, {responsive: true});
+                        }
+                    }, 100);
+                </script>
+            </div>
+            {% endif %}
+            
+            <!-- Gráfico: Status Execuções -->
+            {% if grafico_execucoes %}
+            <div style="background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div id="grafico-execucoes"></div>
+                <script>
+                    var dados_exec = {{ grafico_execucoes|safe }};
+                    setTimeout(function() {
+                        if (Object.keys(dados_exec).length > 0 && typeof Plotly !== 'undefined') {
+                            Plotly.newPlot('grafico-execucoes', dados_exec.data, dados_exec.layout, {responsive: true});
+                        }
+                    }, 100);
+                </script>
+            </div>
+            {% endif %}
         </div>
     </div>
 

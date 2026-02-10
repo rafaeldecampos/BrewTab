@@ -26,16 +26,22 @@
             color: white;
             padding: 1rem 2rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
         header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.6rem;
+            margin: 0;
         }
 
         header p {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             opacity: 0.9;
+            margin-left: 0.75rem;
         }
 
         nav {
@@ -47,6 +53,19 @@
             list-style: none;
             display: flex;
             gap: 2rem;
+            align-items: center;
+        }
+
+        /* mobile: hide nav by default and show when toggled */
+        .nav-toggle {
+            display: none;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.12);
+            color: white;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
         }
 
         nav a {
@@ -237,6 +256,9 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 1rem;
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .table thead {
@@ -282,6 +304,11 @@
             border-radius: 4px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
+        }
+
+        /* Make primary buttons easier to tap on mobile */
+        .btn {
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
         }
 
         .card h3 {
@@ -343,14 +370,37 @@
                 display: block;
                 margin-top: 0.5rem;
             }
+
+            .nav-toggle {
+                display: inline-block;
+            }
+
+            nav {
+                padding: 0.5rem 1rem;
+                width: 100%;
+            }
+
+            nav[hidden] {
+                display: none !important;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            header h1 { font-size: 1.2rem; }
+            header p { display: none; }
         }
     </style>
     {% block extra_css %}{% endblock %}
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    {% block extra_scripts %}{% endblock %}
 </head>
 <body>
     <header>
         <h1>🍺 BrewTab</h1>
         <p>Sistema de Gestão de Processos de Cervejaria</p>
+        <button class="nav-toggle" id="navToggle" aria-controls="mainNav" aria-expanded="false">Menu</button>
         {% if user.is_authenticated %}
         <div class="user-info">
             Olá, <strong>{{ user.username }}</strong> | <a href="{% url 'logout' %}">Sair</a>
@@ -359,13 +409,14 @@
     </header>
 
     {% if user.is_authenticated %}
-    <nav>
+    <nav id="mainNav">
         <ul>
             <li><a href="{% url 'home' %}">Início</a></li>
             <li><a href="{% url 'brewery:list' %}">Minhas Cervejarias</a></li>
         </ul>
     </nav>
     {% endif %}
+
 
     <main>
         {% if messages %}
@@ -387,5 +438,36 @@
     </footer>
 
     {% block extra_js %}{% endblock %}
+    <script>
+        (function(){
+            var btn = document.getElementById('navToggle');
+            var nav = document.getElementById('mainNav');
+            if(!btn || !nav) return;
+
+            function setInitial() {
+                if(window.innerWidth <= 768) {
+                    nav.setAttribute('hidden','');
+                    btn.setAttribute('aria-expanded','false');
+                } else {
+                    nav.removeAttribute('hidden');
+                    btn.setAttribute('aria-expanded','true');
+                }
+            }
+
+            btn.addEventListener('click', function(){
+                var isHidden = nav.hasAttribute('hidden');
+                if(isHidden) {
+                    nav.removeAttribute('hidden');
+                    btn.setAttribute('aria-expanded','true');
+                } else {
+                    nav.setAttribute('hidden','');
+                    btn.setAttribute('aria-expanded','false');
+                }
+            });
+
+            window.addEventListener('resize', setInitial);
+            setInitial();
+        })();
+    </script>
 </body>
 </html>
