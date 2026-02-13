@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Processo, EtapaProcesso, ExecutacaoProcesso, ExecucaoEtapa, 
     HistoricoExecucao, PontoCriticoHACCP, RegistroHACCP, NaoConformidade, 
-    AcaoCorretiva, KPIExercicio
+    AcaoCorretiva, KPIExercicio, SessaoTemporaria
 )
 
 
@@ -209,3 +209,35 @@ class KPIExercicioAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+# ===== DADOS TEMPORÁRIOS =====
+
+@admin.register(SessaoTemporaria)
+class SessaoTemporariaAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'minutos_inativo', 'criada_em', 'ultima_atividade', 'dados_limpis')
+    list_filter = ('dados_limpis', 'criada_em', 'ultima_atividade', 'cervejaria')
+    search_fields = ('usuario__username', 'usuario__email', 'chave_sessao')
+    readonly_fields = ('chave_sessao', 'criada_em', 'ultima_atividade')
+    date_hierarchy = 'criada_em'
+    
+    fieldsets = (
+        ('Sessão', {
+            'fields': ('usuario', 'chave_sessao', 'cervejaria')
+        }),
+        ('Datas', {
+            'fields': ('criada_em', 'ultima_atividade'),
+            'classes': ('collapse',)
+        }),
+        ('Status', {
+            'fields': ('dados_limpis',)
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        """Impede criação manual de sessões"""
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        """Permite deletar sessões expired"""
+        return request.user.is_superuser

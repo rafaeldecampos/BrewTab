@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
+from django.conf import settings
 
 
 def signup_view(request):
@@ -39,6 +40,12 @@ def signup_view(request):
             return render(request, 'auth/signup.html', {'errors': errors, 'username': username, 'email': email})
         
         user = User.objects.create_user(username=username, email=email, password=password)
+        
+        # Criar sessão temporária se modo dados temporários está ativo
+        if getattr(settings, 'DADOS_TEMPORARIOS', False):
+            from processes.dados_temporarios import GestorDadosTemporarios
+            GestorDadosTemporarios.criar_sessao_temporaria(user, request.session.session_key)
+        
         login(request, user)
         messages.success(request, f'Welcome, {username}! Your account has been created.')
         return redirect('home')

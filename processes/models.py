@@ -313,3 +313,30 @@ class Meta(models.Model):
         if self.valor_meta == 0:
             return 0
         return min((float(self.valor_atual) / float(self.valor_meta)) * 100, 100)
+
+
+# ===== MODO DADOS TEMPORÁRIOS =====
+
+class SessaoTemporaria(models.Model):
+    """Rastreamento de sessões de usuários para limpeza automática de dados"""
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='sessao_temporaria', verbose_name='Usuário')
+    chave_sessao = models.CharField(max_length=100, unique=True, verbose_name='Chave da Sessão')
+    criada_em = models.DateTimeField(auto_now_add=True, verbose_name='Criada em')
+    ultima_atividade = models.DateTimeField(auto_now=True, verbose_name='Última Atividade')
+    cervejaria = models.ForeignKey(Brewery, on_delete=models.CASCADE, related_name='sessoes_temporarias', null=True, blank=True, verbose_name='Cervejaria')
+    dados_limpis = models.BooleanField(default=False, verbose_name='Dados Limpos')
+    
+    class Meta:
+        verbose_name = 'Sessão Temporária'
+        verbose_name_plural = 'Sessões Temporárias'
+        ordering = ['-ultima_atividade']
+    
+    def __str__(self):
+        return f"Sessão de {self.usuario.username} - {self.ultima_atividade.strftime('%d/%m/%Y %H:%M')}"
+    
+    @property
+    def minutos_inativo(self):
+        """Retorna quantos minutos a sessão está inativa"""
+        from django.utils import timezone
+        diferenca = timezone.now() - self.ultima_atividade
+        return int(diferenca.total_seconds() / 60)

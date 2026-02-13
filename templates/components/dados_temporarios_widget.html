@@ -1,0 +1,153 @@
+<!-- Exemplo de componente para mostrar status de dados temporários -->
+
+{% load i18n %}
+
+{% if dados_temporarios_ativo %}
+<div class="dados-temporarios-status">
+    <!-- Alerta principal de inatividade -->
+    {% if sessao_expirando %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>⚠ Atenção!</strong>
+            Sua sessão expiará em <strong>{{ tempo_sessao_restante }} minutos</strong>.
+            Seus dados serão apagados quando a sessão terminar.
+            
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+    
+    <!-- Alerta de banco de dados próximo do limite -->
+    {% if database_proxima_limite %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-database"></i>
+            <strong>⚠ Sistema Sobrecarregado!</strong>
+            Banco de dados está quase cheio ({{ tamanho_database|floatformat:1 }}MB). 
+            Todos os dados podem ser apagados em breve.
+            <strong>Salve seus dados!</strong>
+            
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+    
+    <!-- Barra de progresso de sessão -->
+    <div class="session-progress-bar" style="margin: 20px 0;">
+        <div class="d-flex justify-content-between mb-2">
+            <small class="text-muted">
+                <i class="fas fa-hourglass-end"></i>
+                Tempo de sessão restante
+            </small>
+            <small class="text-muted">
+                {{ tempo_sessao_restante }} min
+            </small>
+        </div>
+        
+        <div class="progress" style="height: 20px;">
+            <div class="progress-bar" 
+                 id="session-progress"
+                 role="progressbar" 
+                 style="width: {{ tempo_sessao_restante }}%"
+                 aria-valuenow="{{ tempo_sessao_restante }}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">
+                {{ tempo_sessao_restante }}%
+            </div>
+        </div>
+        <small class="text-muted d-block mt-1">
+            Sessão expira após 30 minutos de inatividade
+        </small>
+    </div>
+    
+    <!-- Informações do banco de dados -->
+    <div class="database-info" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 15px;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-database"></i>
+                <strong>Tamanho do Banco de Dados</strong>
+                <small class="text-muted d-block">
+                    {{ tamanho_database|floatformat:2 }}MB / 50MB
+                </small>
+            </div>
+            <div>
+                {% if database_proxima_limite %}
+                    <span class="badge bg-danger">Limite próximo!</span>
+                {% else %}
+                    <span class="badge bg-success">Normal</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.dados-temporarios-status {
+    font-size: 0.95rem;
+}
+
+.dados-temporarios-status .alert {
+    margin-bottom: 15px;
+    border-left: 4px solid;
+}
+
+.dados-temporarios-status .alert-warning {
+    border-left-color: #ffc107;
+    background-color: #fffbf0;
+}
+
+.dados-temporarios-status .alert-danger {
+    border-left-color: #dc3545;
+    background-color: #fff5f5;
+}
+
+.progress-bar {
+    background-color: #17a2b8;
+    transition: width 0.3s ease;
+}
+
+/* Animação quando tempo está baixo */
+@media (prefers-reduced-motion: no-preference) {
+    .session-progress-bar .progress-bar {
+        animation: pulse 2s infinite;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    /**
+     * SCRIPT: Auto-refresh do contador de sessão
+     * Atualiza a cada minuto
+     */
+    
+    function atualizarProgresso() {
+        const tempoRestante = {{ tempo_sessao_restante }};
+        const progressBar = document.getElementById('session-progress');
+        
+        if (progressBar && tempoRestante !== undefined) {
+            progressBar.style.width = tempoRestante + '%';
+            progressBar.setAttribute('aria-valuenow', tempoRestante);
+            progressBar.textContent = tempoRestante + '%';
+            
+            // Se tempo < 5 minutos, mudar cor
+            if (tempoRestante <= 5) {
+                progressBar.classList.remove('bg-success');
+                progressBar.classList.add('bg-danger');
+            }
+        }
+    }
+    
+    // Atualizar a cada minuto
+    setInterval(function() {
+        // Opcional: fazer requisição AJAX para atualizar
+        // fetch('/api/sessao/info/')...
+        atualizarProgresso();
+    }, 60000);  // 60 segundos
+});
+</script>
+
+{% endif %}
+<!-- FIM: dados_temporarios_ativo -->

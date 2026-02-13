@@ -54,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'brewtab_config.middleware.DadosTemporarioMiddleware',
 ]
 
 ROOT_URLCONF = 'brewtab_config.urls'
@@ -69,6 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'brewtab_config.context_processors.dados_temporarios_context',
             ],
         },
     },
@@ -140,3 +142,13 @@ LOGOUT_REDIRECT_URL = 'home'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# ===== CONFIGURAÇÃO DE DADOS TEMPORÁRIOS =====
+# Ativar modo de dados temporários para hospedagem pública
+DADOS_TEMPORARIOS = os.environ.get('DADOS_TEMPORARIOS', 'False').lower() == 'true'
+
+# Tempo em minutos para limpeza automática de dados (padrão: 30 minutos)
+DADOS_TEMPORARIOS_TIMEOUT = int(os.environ.get('DADOS_TEMPORARIOS_TIMEOUT', '30'))
+
+# Tamanho máximo do banco de dados em MB antes de limpeza forçada
+DADOS_TEMPORARIOS_MAX_DB_SIZE_MB = int(os.environ.get('DADOS_TEMPORARIOS_MAX_DB_SIZE_MB', '50'))
